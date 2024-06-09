@@ -1,0 +1,92 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/main.o",
+      "main.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/main.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/cam.o",
+      "camera.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/camera.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/cam.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/vec.o",
+      "vec3.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/vec3.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/vec.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/ray.o",
+      "ray.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/ray.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/ray.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/obj.o",
+      "object.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/object.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/obj.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/interval.o",
+      "interval.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/interval.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/interval.o"
+  }
+]

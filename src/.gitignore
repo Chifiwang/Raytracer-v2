@@ -1,0 +1,10 @@
+# ignore clangd cache
+.cache/
+
+# ignore object files
+*.o
+
+# ignore executables
+*.exe
+*.out
+*.app
