@@ -5,6 +5,8 @@
 #include "utils.hpp"
 #include "camera.hpp"
 #include "object.hpp"
+#include "material.hpp"
+#include "texture.hpp"
 
 // IWYU pragma: end_exports
 #endif // !RAYTRACER_HPP

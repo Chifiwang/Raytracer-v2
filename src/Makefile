@@ -3,7 +3,7 @@ CFLAGS = -std=c++17 -Wall -Werror
 
 all: final
 
-final: main.o cam.o vec.o ray.o obj.o interval.o
+final: main.o cam.o vec.o ray.o obj.o interval.o texture.o material.o
 	cd ../build && \
 	$(CC) $(CFLAGS) \
 	main.o \
@@ -12,6 +12,8 @@ final: main.o cam.o vec.o ray.o obj.o interval.o
 	ray.o \
 	obj.o \
 	interval.o \
+	texture.o \
+	material.o \
 	-o main && \
 	cd ../src
 
@@ -32,3 +34,10 @@ obj.o: object.cpp
 
 interval.o: interval.cpp
 	$(CC) $(CFLAGS) -c interval.cpp -o ../build/interval.o
+
+texture.o: texture.cpp
+	$(CC) $(CFLAGS) -c texture.cpp -o ../build/texture.o
+
+material.o: material.cpp
+	$(CC) $(CFLAGS) -c material.cpp -o ../build/material.o
+

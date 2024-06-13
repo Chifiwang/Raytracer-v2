@@ -4,7 +4,8 @@
 #include "object.hpp"
 #include "ray.hpp"
 #include "vec3.hpp"
-#include <iostream>
+#include "texture.hpp"
+#include <memory>
 
 using angle = double;
 
@@ -31,9 +32,12 @@ public:
   double focal_length = 1.0;
   double aperture = 0.0;
 
-  point3 cam_pos = point3(0, 0, 0);
+  point3 cam_pos = point3(0);
   vec3 cam_tilt = vec3(0, 1, 0); // points up
   point3 subject_pos = point3(0, 0, -1);
+  double focus_dist = 1; // distance from camera that you want to be in focus
+
+  std::shared_ptr<Texture> sky_box = std::make_shared<Solid>(color(0));
 
   Camera() {}
   void render(Object &scene, std::ostream &output = std::cout);

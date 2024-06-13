@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "material.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
 #include <iostream>
@@ -6,7 +7,7 @@
 void Camera::init()
 {
     m_aspect_ratio = double(image_width) / image_height;
-    double frame_h_len = 2 * tan(to_radians(fov) / 2);
+    double frame_h_len = 2 * tan(to_radians(fov) / 2) * focal_length;
     double frame_w_len = frame_h_len * m_aspect_ratio;
 
     vec3 cam_dir = normalize(cam_pos - subject_pos);
@@ -52,23 +53,54 @@ color Camera::cast_ray(Object& scene, int r, int c)
 
     ray axis(cam_pos, axis_dir);
 
-    // TODO: add depth of field
+    // TODO: add depth of field & bouncing rays
+    // Add pdf infra
 
-    collision_history ray_data;
-    ray_data.min_dist = Interval(0.001, infty);
+    color res = color(0, 0, 0);
+    for (int i = 0; i < sample_rate; ++i) {
+        point3 focus = axis.at(focus_dist); // should be at cam_pos + axis_dir
+        vec3 antialias_variance = random_on_unit_disk(); // antialias variance param
+        vec3 aperature_variance = aperture * random_on_unit_disk();
 
-    if (scene.hit(axis, ray_data)) {
-        vec3 N = ray_data.normal;
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+        point3 light_origin = cam_pos
+            + aperature_variance.x() * normalize(m_px_width)
+            + aperature_variance.y() * normalize(m_px_height);
+
+        vec3 light_dir = normalize(focus - light_origin);
+
+        light_origin += antialias_variance.x() * m_px_width
+            + antialias_variance.y() * m_px_height;
+
+        ray cast_ray = ray(light_origin, light_dir);
+
+        // std::cerr << cast_ray.direction() - axis.direction() << '\n';
+        // std::cerr << cast_ray.origin() - axis.origin() << '\n';
+
+        collision_history ray_data;
+        ray_data.min_dist = Interval(0.001, infty);
+        // //
+        if (!scene.hit(cast_ray, ray_data)) {
+            // vec3 N = ray_data.normal;
+            // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+            res += sky_box->sample(axis.direction());
+            continue;
+        }
+
+        // vec3 N = ray_data.normal;
+        // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+        vec3 point_light = vec3(2, 2, 1);
+        vec3 l = point_light - ray_data.collision;
+        res += disney_brdf(l, cast_ray.direction(), ray_data);
+
+        // net color
+        // for (int i = 0; i < simulation_depth; ++i) {
+        //     scatter ray
+        //     if light compute color
+        //     else scatter again
+        //     accumulate color from "recursive" computation
     }
-
-    return color_ray(axis);
-}
-
-color Camera::color_ray(const ray& r)
-{
-    double a = 0.5 * (r.direction().y() + 1);
-    return (1.0 - a) * color(1, 1, 1) + a * color(0.5, 0.7, 1.0);
+    // return normalized net color
+    return res / sample_rate;
 }
 
 void Camera::write_pixel(color c, std::ostream& output)
