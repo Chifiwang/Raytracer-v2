@@ -112,7 +112,8 @@ color disney_brdf(const vec3& l, const vec3& v, const collision_history &data)
     // return ((1 / pi) * lerp(diffuse_fresnel, subsurface, mat->subsurface) * cd_lin + sheen)
     //     * (1 - mat->metallic)
     //     + g_s * f_s * d_s + .25 * mat->clearcoat * dr * gr * fr;
-    Interval i(0, 1);
+    Interval i(.01, 1);
     double r = i.clamp(dot(l, data.normal));
     return data.mat->base_texture->sample(data.collision) * r;
+    // return data.mat->base_texture->sample(data.collision);
 }

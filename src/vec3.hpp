@@ -75,6 +75,7 @@ vec3 operator-(const vec3& u);
 vec3 operator*(double t, const vec3& u);
 vec3 operator*(const vec3& u, double t);
 vec3 operator/(const vec3& u, double t);
+vec3 operator*(const vec3& u, const vec3& v);
 
 std::ostream& operator<<(std::ostream& out, vec3 u);
 

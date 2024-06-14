@@ -18,6 +18,15 @@ vec3 operator*(double t, const vec3& u)
     return vec3(t * u.x(), t * u.y(), t * u.z());
 }
 vec3 operator*(const vec3& u, double t) { return t * u; }
+
+vec3 operator*(const vec3& u, const vec3& v)
+{
+    return vec3(
+        u.x() * v.x(),
+        u.y() * v.y(),
+        u.z() * v.z());
+}
+
 vec3 operator/(const vec3& u, double t) { return (1 / t) * u; }
 
 vec3& vec3::operator+=(const vec3& u)

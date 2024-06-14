@@ -1,5 +1,23 @@
 #include "object.hpp"
 #include "vec3.hpp"
+#include <memory>
+
+void Collection::add(Object* obj)
+{
+    objects.push_back(obj);
+}
+
+bool Collection::hit(const ray& r, collision_history& data) const
+{
+    bool res = false;
+    for (auto obj : objects) {
+        if (obj->hit(r, data)) {
+            res = true;
+        }
+    }
+
+    return res;
+}
 
 bool Sphere::hit(const ray& r, collision_history& data) const
 {
@@ -18,10 +36,10 @@ bool Sphere::hit(const ray& r, collision_history& data) const
     double sqrt_D = std::sqrt(D);
     double t = (B - sqrt_D) / A;
     if (!data.min_dist.contains(t)) {
-        t = (B + sqrt_D) / A;
-        if (!data.min_dist.contains(t)) {
-            return false;
-        }
+        //     t = (B + sqrt_D) / A;
+        //     if (!data.min_dist.contains(t)) {
+        return false;
+        //     }
     }
 
     data.collision = r.at(t);
