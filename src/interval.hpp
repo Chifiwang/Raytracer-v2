@@ -23,6 +23,8 @@ public:
 
     bool contains(double x) const;
     double clamp(double x) const;
+
+    static Interval Unit;
 };
 
 #endif // !INTERVAL_HPP

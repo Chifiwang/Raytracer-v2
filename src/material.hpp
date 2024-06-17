@@ -1,31 +1,28 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
-#include "texture.hpp"
-#include "utils.hpp"
+#include "vec3.hpp"
 struct collision_history;
 
+// enum material_flags {
+//     empty = 0b0 << 0,
+//     metallic = 0b1 << 0, // 0 is dielectric, 1 is metallic
+//     emissive = 0b1 << 1,
+//     all = 0b11
+// };
+
 struct Material {
-    Texture* base_texture = nullptr;
-    double subsurface = 0;
-    double metallic = 0;
-    double specular = .5;
-    double specular_tint = 0;
-    double roughness = .5;
-    double anisotropic = 0;
-    double sheen = 0;
-    double sheen_tint = .5;
-    double clearcoat = 0;
-    double clearcoat_gloss = 1;
+    // unsigned properties = material_flags::all;
+    double roughness = 1;
+    double specular = 0;
+
+    color contribution = color(1);
+
+    color emission_color = color(0);
+    double emission_power = 0;
 };
 
-double schlick_fresnel(double cos_t);
-double gtr1(double cos_td, double a);
-double gtr2(double cos_td, double a);
-double gtr2_aniso(double cos_td, double cos_tx, double cos_ty, double a_x, double a_y);
-double smithg_ggx(double cos_t, double a_g);
-double smithg_ggx_aniso(double cos_t, double cos_tx, double cos_ty, double a_x, double a_y);
-color mon2lin(const color& c);
-color disney_brdf(const vec3& l, const vec3& v, const collision_history& data);
+vec3 scatter(const vec3& v, const collision_history&data);
+color brdf(const vec3& l, const vec3& v, const collision_history& data);
 
 #endif // !MATERIAL_HPP

@@ -53,6 +53,13 @@ vec3& vec3::operator*=(const double t)
 
     return *this;
 }
+vec3& vec3::operator*=(const vec3 &u) {
+    this->m_data[0] *= u.x();
+    this->m_data[1] *= u.y();
+    this->m_data[2] *= u.z();
+
+    return *this;
+}
 vec3& vec3::operator/=(const double t) { return (*this) *= 1 / t; }
 
 double vec3::magnetude() const { return std::sqrt(dot(*this, *this)); }

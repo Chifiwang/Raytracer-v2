@@ -14,3 +14,5 @@ double Interval::clamp(double x) const
     }
     return m_max;
 }
+
+Interval Interval::Unit = Interval(0, 1);

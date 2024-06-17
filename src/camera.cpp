@@ -1,12 +1,14 @@
 #include "camera.hpp"
+#include "interval.hpp"
 #include "material.hpp"
+#include "object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
-#include "object.hpp"
 
-void Camera::init(Object *scene)
+void Camera::init(Object* scene, Object* lights)
 {
     m_scene = scene;
+    m_lights = lights;
 
     m_aspect_ratio = double(image_width) / image_height;
     double frame_h_len = 2 * tan(to_radians(fov) / 2) * focal_length;
@@ -27,9 +29,9 @@ void Camera::init(Object *scene)
     m_sampling_weight = 1.0 / sample_rate;
 }
 
-void Camera::render(Object* scene, std::ostream& output)
+void Camera::render(Object* scene, Object* lights, std::ostream& output)
 {
-    init(scene);
+    init(scene, lights);
 
     // Write ppm header
     output << "P3\n"
@@ -48,41 +50,57 @@ void Camera::render(Object* scene, std::ostream& output)
     std::clog << "\rRender Completed                                   \n";
 }
 
-color Camera::bounce_ray(const ray& r, int iter)
+color Camera::bounce_ray(const ray& r)
 {
-    if (iter < 0) {
-        return color(0);
-    }
+    ray curr = r;
+    color light{0};
+    color contribution{1};
 
     collision_history data;
-    if (!m_scene->hit(r, data)) {
-        return sky_box->sample(r.direction());
+    for (int i = 0; i < simulation_depth; ++i) {
+
+        // collision_history data;
+        data = collision_history();
+        if (!m_scene->hit(curr, data)) {
+            light += sky_box->sample(curr.direction()) * contribution;
+            break;
+        }
+
+        // vec3 N = ray_data.normal;
+        // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+        // color emitted{0};
+        // if (data.mat->properties & emissive) {
+        light += data.mat->emission_color * data.mat->emission_power;
+        // }
+
+        // simulate light pdf
+        // vec3 point_light = m_lights->random_point();
+        // vec3 l = normalize(point_light - data.collision);
+        //
+        // shadow ray cast
+        // ray shadow = ray(data.collision, normalize(l - data.collision));
+        // collision_history shadow_data;
+
+        // if (m_scene->hit(shadow, shadow_data)) {
+            // continue;
+        // }
+        contribution *= brdf(data.normal, curr.direction(), data);
+        // }
+
+        // compute rendering equation (assuming emitted light = 0)
+        // hard coded scattering of a cosine dist
+        // vec3 scatter_dir = normalize(random_unit_vec3_on_hemisphere(data.normal) + data.normal);
+        vec3 scatter_dir = scatter(r.direction(), data);
+        // vec3 scatter_dir = reflect(r.direction(), data.normal);
+        curr = ray(data.collision, scatter_dir);
     }
-
-    // vec3 N = ray_data.normal;
-    // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
-
-    // simulate light pdf
-    vec3 point_light = vec3(2, 2, 1) + random_unit_vec3();
-    vec3 l = normalize(point_light - data.collision);
-
-    // shadow ray cast
-    ray shadow = ray(data.collision, normalize(l - data.collision));
     collision_history shadow_data;
-
-    color attenuation;
-    if (m_scene->hit(shadow, shadow_data)) {
-        return color(0);
-    } else {
-        // minimize expensive call to brdf
-        attenuation = disney_brdf(l, r.direction(), data);
+    point3 light_pos = m_lights->random_point();
+    ray shadow_ray = ray(light_pos, light_pos - data.collision);
+    if (m_scene->hit(shadow_ray, shadow_data)) {
+        return color{0};
     }
-
-    // compute rendering equation (assuming emitted light = 0)
-    vec3 scatter_dir = random_unit_vec3_on_hemisphere(data.normal);
-    ray scatter_ray = ray(data.collision, scatter_dir);
-
-    return bounce_ray(scatter_ray, iter - 1) * attenuation;
+    return light;
 }
 
 color Camera::cast_ray(int r, int c)
@@ -95,15 +113,16 @@ color Camera::cast_ray(int r, int c)
     // TODO: add depth of field & bouncing rays
     // Add pdf infra
 
-    color res = color(0, 0, 0);
+    color res = color(0);
 
-    // run a jank monte-carlo on each pixel
+    // run a jank monte-carlo on each pixel for the path tracer
     for (int i = 0; i < sample_rate; ++i) {
         // Cast inital ray with depth of field variance
         point3 focus = axis.at(focus_dist);
         vec3 antialias_variance = random_on_unit_disk();
         vec3 aperature_variance = aperture * random_on_unit_disk();
 
+        // hard coded light for now
         point3 light_origin = cam_pos
             + aperature_variance.x() * normalize(m_px_width)
             + aperature_variance.y() * normalize(m_px_height);
@@ -117,7 +136,7 @@ color Camera::cast_ray(int r, int c)
 
         // start calculating bounces
 
-        res += bounce_ray(cast_ray, simulation_depth);
+        res += bounce_ray(cast_ray);
     }
     return res / sample_rate;
 }
@@ -134,6 +153,10 @@ void Camera::write_pixel(color c, std::ostream& output)
         g = 0.0;
     if (b != b)
         b = 0.0;
+
+    r = Interval::Unit.clamp(r);
+    g = Interval::Unit.clamp(g);
+    b = Interval::Unit.clamp(b);
 
     output << int(255 * r) << ' ' << int(255 * g) << ' '
            << int(255 * b) << '\n';

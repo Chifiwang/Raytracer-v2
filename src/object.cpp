@@ -1,6 +1,6 @@
 #include "object.hpp"
+#include "raytracer.hpp"
 #include "vec3.hpp"
-#include <memory>
 
 void Collection::add(Object* obj)
 {
@@ -17,6 +17,10 @@ bool Collection::hit(const ray& r, collision_history& data) const
     }
 
     return res;
+}
+
+point3 Collection::random_point() const {
+    return objects[random_int(0, objects.size() - 1)]->random_point();
 }
 
 bool Sphere::hit(const ray& r, collision_history& data) const
@@ -36,17 +40,19 @@ bool Sphere::hit(const ray& r, collision_history& data) const
     double sqrt_D = std::sqrt(D);
     double t = (B - sqrt_D) / A;
     if (!data.min_dist.contains(t)) {
-        //     t = (B + sqrt_D) / A;
-        //     if (!data.min_dist.contains(t)) {
         return false;
-        //     }
     }
 
     data.collision = r.at(t);
     data.normal = (data.collision - m_centre) / m_radius;
     data.normal = dot(data.normal, d) > 0 ? -data.normal : data.normal;
-    data.mat = mat;
+    data.mat = m_props.material;
+    data.tex = m_props.texture;
     data.min_dist.set_max(t);
 
     return true;
+}
+
+point3 Sphere::random_point() const {
+    return m_centre + random_unit_vec3() * m_radius;
 }

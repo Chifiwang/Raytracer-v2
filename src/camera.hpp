@@ -17,10 +17,11 @@ class Camera {
     vec3 m_px_00;
 
     const Object* m_scene;
+    const Object* m_lights;
 
-    void init(Object* scene);
+    void init(Object* scene, Object* lights);
     void write_pixel(color c, std::ostream& output);
-    color bounce_ray(const ray& r, int iter);
+    color bounce_ray(const ray& r);
     color cast_ray(int r, int c);
     color color_ray(const ray& r);
 
@@ -42,7 +43,7 @@ public:
     Texture* sky_box = nullptr;
 
     Camera() { }
-    void render(Object* scene, std::ostream& output = std::cout);
+    void render(Object* scene, Object* lights, std::ostream& output = std::cout);
 };
 
 #endif // !CAMERA_HPP

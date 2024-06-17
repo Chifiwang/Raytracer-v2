@@ -43,6 +43,7 @@ public:
     vec3& operator+=(const vec3& u);
     vec3& operator-=(const vec3& u);
     vec3& operator*=(const double t);
+    vec3& operator*=(const vec3& u);
     vec3& operator/=(const double t);
 
     double magnetude() const;
@@ -51,7 +52,7 @@ public:
     friend vec3 normalize(const vec3& u);
     friend double dot(const vec3& u, const vec3& v);
     friend vec3 cross(const vec3& u, const vec3& v);
-    friend vec3 reflect(const vec3& u, const vec3& v);
+    friend vec3 reflect(const vec3& u, const vec3& n);
     friend vec3 refract(const vec3& inc, const vec3& n, double refraction_ratio);
     friend vec3 lerp(const vec3& u, const vec3& v, double t);
 
