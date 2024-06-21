@@ -8,6 +8,6 @@ color Solid::sample(const point3& p) const
 
 color Gradient::sample(const point3& p) const
 {
-    double a = 0.5 * (normalize(p).y() + 1);
+    double a = 0.5 * (normalize(p).y + 1);
     return (1.0 - a) * primary + a * secondary;
 }

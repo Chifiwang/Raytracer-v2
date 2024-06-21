@@ -7,7 +7,7 @@
 
 void Camera::init(Object* scene, Object* lights)
 {
-    m_scene = scene;
+    m_scene = new bvh(scene);
     m_lights = lights;
 
     m_aspect_ratio = double(image_width) / image_height;
@@ -53,52 +53,38 @@ void Camera::render(Object* scene, Object* lights, std::ostream& output)
 color Camera::bounce_ray(const ray& r)
 {
     ray curr = r;
-    color light{0};
-    color contribution{1};
+    color light { 0 };
+    color contribution { 1 };
 
     collision_history data;
+    // NOTE: Each iteration is one recursive iteration of the recursive rendering equation
     for (int i = 0; i < simulation_depth; ++i) {
 
-        // collision_history data;
         data = collision_history();
         if (!m_scene->hit(curr, data)) {
-            light += sky_box->sample(curr.direction()) * contribution;
+            light += sky_box->sample(curr.direction) * contribution;
             break;
         }
 
-        // vec3 N = ray_data.normal;
-        // return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
-        // color emitted{0};
-        // if (data.mat->properties & emissive) {
+        // NOTE: Models the Light emitted part of the lighting equation
         light += data.mat->emission_color * data.mat->emission_power;
-        // }
 
-        // simulate light pdf
-        // vec3 point_light = m_lights->random_point();
-        // vec3 l = normalize(point_light - data.collision);
-        //
-        // shadow ray cast
-        // ray shadow = ray(data.collision, normalize(l - data.collision));
-        // collision_history shadow_data;
+        // NOTE: Calculate where the incident light came from and repeat rendering eq on that
+        vec3 scatter_dir = scatter(r.direction, data);
 
-        // if (m_scene->hit(shadow, shadow_data)) {
-            // continue;
-        // }
-        contribution *= brdf(data.normal, curr.direction(), data);
-        // }
+        // NOTE: Models the absorption of certain light frequencies and their intensity
+        contribution *= brdf(scatter_dir, curr.direction, data)
+            * data.tex->sample(data.collision)
+            * dot(data.normal, scatter_dir);
 
-        // compute rendering equation (assuming emitted light = 0)
-        // hard coded scattering of a cosine dist
-        // vec3 scatter_dir = normalize(random_unit_vec3_on_hemisphere(data.normal) + data.normal);
-        vec3 scatter_dir = scatter(r.direction(), data);
-        // vec3 scatter_dir = reflect(r.direction(), data.normal);
+        // prepare for next iteration;
         curr = ray(data.collision, scatter_dir);
     }
     collision_history shadow_data;
     point3 light_pos = m_lights->random_point();
     ray shadow_ray = ray(light_pos, light_pos - data.collision);
     if (m_scene->hit(shadow_ray, shadow_data)) {
-        return color{0};
+        return color { 0 };
     }
     return light;
 }
@@ -119,18 +105,18 @@ color Camera::cast_ray(int r, int c)
     for (int i = 0; i < sample_rate; ++i) {
         // Cast inital ray with depth of field variance
         point3 focus = axis.at(focus_dist);
-        vec3 antialias_variance = random_on_unit_disk();
+        vec3 antialias_variance = vec3(-1, 1);
         vec3 aperature_variance = aperture * random_on_unit_disk();
 
         // hard coded light for now
         point3 light_origin = cam_pos
-            + aperature_variance.x() * normalize(m_px_width)
-            + aperature_variance.y() * normalize(m_px_height);
+            + aperature_variance.x * normalize(m_px_width)
+            + aperature_variance.y * normalize(m_px_height);
 
         vec3 light_dir = normalize(focus - light_origin);
 
-        light_origin += .5 * antialias_variance.x() * m_px_width
-            + .5 * antialias_variance.y() * m_px_height;
+        light_origin += antialias_variance.x * m_px_width
+            + antialias_variance.y * m_px_height;
 
         ray cast_ray = ray(light_origin, light_dir);
 
@@ -143,9 +129,9 @@ color Camera::cast_ray(int r, int c)
 
 void Camera::write_pixel(color c, std::ostream& output)
 {
-    double r = c.x();
-    double g = c.y();
-    double b = c.z();
+    double r = c.x;
+    double g = c.y;
+    double b = c.z;
 
     if (r != r)
         r = 0.0;

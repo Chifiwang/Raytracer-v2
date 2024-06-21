@@ -3,43 +3,37 @@
 #include "utils.hpp"
 #include <ostream>
 
-class vec3 {
-    double m_data[3];
+struct vec3 {
+    double x, y, z;
 
-public:
     vec3()
     {
-        m_data[0] = 0.0;
-        m_data[1] = 0.0;
-        m_data[2] = 0.0;
+        x = 0.0;
+        y = 0.0;
+        z = 0.0;
     }
-    vec3(double x, double y, double z)
+    vec3(double i, double j, double k)
     {
-        m_data[0] = x;
-        m_data[1] = y;
-        m_data[2] = z;
+        x = i;
+        y = j;
+        z = k;
     }
     vec3(double value)
     {
-        m_data[0] = value;
-        m_data[1] = value;
-        m_data[2] = value;
+        x = value;
+        y = value;
+        z = value;
     }
 
-    double x() const { return m_data[0]; }
-    double y() const { return m_data[1]; }
-    double z() const { return m_data[2]; }
+    vec3(double min, double max)
+    {
+        x = random_double(min, max);
+        y = random_double(min, max);
+        z = random_double(min, max);
+    }
 
-    double& operator[](int i);
-    double operator[](int i) const { return m_data[i]; }
-
-    friend vec3 operator+(const vec3& u, const vec3& v);
-    friend vec3 operator-(const vec3& u, const vec3& v);
-    friend vec3 operator-(const vec3& u);
-    friend vec3 operator*(double t, const vec3& u);
-    friend vec3 operator*(const vec3& u, double t);
-    friend vec3 operator/(const vec3& u, double t);
-
+    double operator[](int t) const;
+    double operator[](int t);
     vec3& operator+=(const vec3& u);
     vec3& operator-=(const vec3& u);
     vec3& operator*=(const double t);
@@ -48,23 +42,6 @@ public:
 
     double magnetude() const;
     bool near_zero() const;
-
-    friend vec3 normalize(const vec3& u);
-    friend double dot(const vec3& u, const vec3& v);
-    friend vec3 cross(const vec3& u, const vec3& v);
-    friend vec3 reflect(const vec3& u, const vec3& n);
-    friend vec3 refract(const vec3& inc, const vec3& n, double refraction_ratio);
-    friend vec3 lerp(const vec3& u, const vec3& v, double t);
-
-    static vec3 random()
-    {
-        return vec3(random_double(), random_double(), random_double());
-    }
-
-    static vec3 random(double min, double max)
-    {
-        return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
-    }
 };
 
 using point3 = vec3;
@@ -77,6 +54,7 @@ vec3 operator*(double t, const vec3& u);
 vec3 operator*(const vec3& u, double t);
 vec3 operator/(const vec3& u, double t);
 vec3 operator*(const vec3& u, const vec3& v);
+vec3 operator/(const vec3& u, const vec3& v);
 
 std::ostream& operator<<(std::ostream& out, vec3 u);
 
@@ -91,5 +69,8 @@ vec3 random_unit_vec3();
 vec3 random_unit_vec3_on_hemisphere(const vec3& norm);
 vec3 random_on_unit_disk();
 vec3 random_cos_dir();
+
+vec3 min(const vec3&u, const vec3&v);
+vec3 max(const vec3&u, const vec3&v);
 
 #endif

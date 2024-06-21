@@ -1,12 +1,29 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 // IWYU pragma: private, include "raytracer.hpp"
+#include "object.hpp"
 #include "ray.hpp"
 #include "texture.hpp"
 #include "vec3.hpp"
-class Object;
+// #include "matrix.hpp"
 
 using angle = double;
+
+// struct Element {
+//     unsigned object_id;
+//     point3 position;
+//
+//     void rotate(double x, double y, double z);
+//     void scale(double s);
+// private:
+//     mat3x3 transform;
+//     mat3x3 inv_transform;
+// };
+//
+// struct Scene {
+//     std::vector<Element> elements;
+//     std::vector<Object*> objects;
+// };
 
 class Camera {
     double m_aspect_ratio;
@@ -16,7 +33,8 @@ class Camera {
     vec3 m_px_width;
     vec3 m_px_00;
 
-    const Object* m_scene;
+    const bvh* m_scene = nullptr;
+    const Object* m_objects;
     const Object* m_lights;
 
     void init(Object* scene, Object* lights);
@@ -43,6 +61,7 @@ public:
     Texture* sky_box = nullptr;
 
     Camera() { }
+    ~Camera() { delete m_scene; }
     void render(Object* scene, Object* lights, std::ostream& output = std::cout);
 };
 

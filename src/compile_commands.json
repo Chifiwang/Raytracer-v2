@@ -118,5 +118,20 @@
     "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
     "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/material.cpp",
     "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/material.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-Wall",
+      "-Werror",
+      "-c",
+      "-o",
+      "../build/bvh.o",
+      "bvh.cpp"
+    ],
+    "directory": "/Users/chifi/Developer/cpp/raytracing-v2/src",
+    "file": "/Users/chifi/Developer/cpp/raytracing-v2/src/bvh.cpp",
+    "output": "/Users/chifi/Developer/cpp/raytracing-v2/build/bvh.o"
   }
 ]
