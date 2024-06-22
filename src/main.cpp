@@ -12,11 +12,11 @@ int main(void)
     // cam.fov = 1;
     cam.aperture = 0;
 
-    cam.simulation_depth = 4;
-    cam.sample_rate = 128;
+    cam.simulation_depth = 8;
+    cam.sample_rate = 256;
 
     // Gradient sky_box = Gradient(color(1), color(0.5, 0.7, 1));
-    Gradient sky_box = Gradient(color(0), color(.4, .2, .7));
+    Gradient sky_box = Gradient(color(0), .5 * color(.4, .2, .7));
     // Solid sky_box = Solid(0);
     cam.sky_box = &sky_box;
 
@@ -27,9 +27,9 @@ int main(void)
     // Object_list scene;
     // ... scene objects
     Material sphere_mat;
-    sphere_mat.specular = .75;
-    sphere_mat.roughness = .6;
-    sphere_mat.transmissive = 1;
+    sphere_mat.specular = 1;
+    sphere_mat.roughness = .75;
+    sphere_mat.transmissive = false;
     sphere_mat.IoR = 1.5;
     Solid sphere_text(color(1, 0, 1));
     Solid sphere_text2(color(.2, .3, 1));

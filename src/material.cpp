@@ -3,6 +3,7 @@
 #include "raytracer.hpp"
 #include "texture.hpp"
 #include "vec3.hpp"
+#include <cmath>
 
 inline double schlick_fresnel(double cos_t)
 {
@@ -22,15 +23,23 @@ inline double diffuse_lobe(const vec3& l, const vec3& v, const collision_history
 
     return inv_pi * fd;
 }
-//
-// inline double specular_lobe(double a, double NoH)
-// {
-//     // GGX
-//     double NoH2 = NoH * NoH;
-//     double tan2 = (1 - NoH2) / NoH2;
-//
-//     return 1 / pi * sq(a / (NoH2 * (a * a + tan2)));
-// }
+
+inline double specular_lobe(double a, double NoH, double NoL, double NoV, double f0)
+{
+    double NoH2 = NoH * NoH;
+
+    double pow = (NoH2 - 1) / (a * NoH2);
+    double den = pi * a * sq(NoH2);
+
+    double d = std::exp(pow) / den;
+
+    // double g = NoL * NoV; // got canceled out
+
+    double f = 1 - lerp(f0, 1, NoL);
+
+    return f * d / 4;
+
+}
 
 vec3 scatter(const vec3& v, const collision_history& data)
 {
@@ -57,9 +66,15 @@ double brdf(const vec3& l, const vec3& v, const collision_history& data)
     //     return color(0);
     // }
 
-    // vec3 h = normalize(-l + v);
+    vec3 h = normalize(l - v);
+    double NoH = dot(data.normal, h);
+    double NoL = dot(data.normal, l);
+    double NoV = dot(data.normal, -v);
+    double a = sq(data.mat->roughness);
+    double f0 = sq((1 - data.mat->IoR) / (1 + data.mat->IoR));
     // double d = specular_lobe(sq(data.mat->roughness), dot(data.normal, h));
 
-    return diffuse_lobe(l, v, data); // add specular lobe to principled brdf
+    return lerp(diffuse_lobe(l, v, data), Interval::Unit.clamp(specular_lobe(a, NoH, NoL, NoV, f0)), data.mat->specular);
+    // return diffuse_lobe(l, v, data); // add specular lobe to principled brdf
     // return data.tex->sample(data.collision);
 }

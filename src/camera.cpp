@@ -26,7 +26,9 @@ void Camera::init(Object* scene, Object* lights)
 
     m_px_00 = cam_pos - cam_dir - (frame_h + frame_w - m_px_height - m_px_width) / 2;
 
-    m_sampling_weight = 1.0 / sample_rate;
+    m_sqrt_sample_rate = std::sqrt(sample_rate);
+    m_sqrt_inv_sample_rate = 1.0 / m_sqrt_sample_rate;
+    m_sampling_weight = sq(m_sqrt_inv_sample_rate);
 }
 
 void Camera::render(Object* scene, Object* lights, std::ostream& output)
@@ -91,38 +93,38 @@ color Camera::bounce_ray(const ray& r)
 
 color Camera::cast_ray(int r, int c)
 {
-    point3 pixel = m_px_00 + r * m_px_height + c * m_px_width;
-    vec3 axis_dir = normalize(pixel - cam_pos);
-
-    ray axis(cam_pos, axis_dir);
-
     // TODO: add depth of field & bouncing rays
     // Add pdf infra
 
     color res = color(0);
 
     // run a jank monte-carlo on each pixel for the path tracer
-    for (int i = 0; i < sample_rate; ++i) {
-        // Cast inital ray with depth of field variance
-        point3 focus = axis.at(focus_dist);
-        vec3 antialias_variance = vec3(-1, 1);
-        vec3 aperature_variance = aperture * random_on_unit_disk();
+    for (int i = 0; i < m_sqrt_sample_rate; ++i) {
+        for (int j = 0; j < m_sqrt_sample_rate; ++j) {
+            // Cast inital ray with depth of field variance
+            vec3 antialias_variance_x = (i + random_double()) * m_sqrt_inv_sample_rate - .5;
+            vec3 antialias_variance_y = (j + random_double()) * m_sqrt_inv_sample_rate - .5;
+            vec3 aperature_variance = aperture * random_on_unit_disk();
 
-        // hard coded light for now
-        point3 light_origin = cam_pos
-            + aperature_variance.x * normalize(m_px_width)
-            + aperature_variance.y * normalize(m_px_height);
+            point3 pixel = m_px_00 + (r + antialias_variance_y) * m_px_height
+                + (c + antialias_variance_x) * m_px_width;
+            vec3 axis_dir = normalize(pixel - cam_pos);
 
-        vec3 light_dir = normalize(focus - light_origin);
+            ray axis(cam_pos, axis_dir);
+            point3 focus = axis.at(focus_dist);
+            // hard coded light for now
+            point3 light_origin = cam_pos
+                + aperature_variance.x * normalize(m_px_width)
+                + aperature_variance.y * normalize(m_px_height);
 
-        light_origin += antialias_variance.x * m_px_width
-            + antialias_variance.y * m_px_height;
+            vec3 light_dir = normalize(focus - light_origin);
 
-        ray cast_ray = ray(light_origin, light_dir);
+            ray cast_ray = ray(light_origin, light_dir);
 
-        // start calculating bounces
+            // start calculating bounces
 
-        res += bounce_ray(cast_ray);
+            res += bounce_ray(cast_ray);
+        }
     }
     return res / sample_rate;
 }

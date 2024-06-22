@@ -32,6 +32,8 @@ class Camera {
     vec3 m_px_height;
     vec3 m_px_width;
     vec3 m_px_00;
+    int m_sqrt_sample_rate;
+    int m_sqrt_inv_sample_rate;
 
     const bvh* m_scene = nullptr;
     const Object* m_objects;
