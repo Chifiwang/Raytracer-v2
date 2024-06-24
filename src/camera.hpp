@@ -5,26 +5,9 @@
 #include "ray.hpp"
 #include "texture.hpp"
 #include "vec3.hpp"
-// #include "matrix.hpp"
+
 
 using angle = double;
-
-// struct Element {
-//     unsigned object_id;
-//     point3 position;
-//
-//     void rotate(double x, double y, double z);
-//     void scale(double s);
-// private:
-//     mat3x3 transform;
-//     mat3x3 inv_transform;
-// };
-//
-// struct Scene {
-//     std::vector<Element> elements;
-//     std::vector<Object*> objects;
-// };
-
 class Camera {
     double m_aspect_ratio;
     double m_sampling_weight;
@@ -38,11 +21,12 @@ class Camera {
     const bvh* m_scene = nullptr;
     const Object* m_objects;
     const Object* m_lights;
+    // thread_pool m_pool;
 
     void init(Object* scene, Object* lights);
     void write_pixel(color c, std::ostream& output);
-    color bounce_ray(const ray& r);
-    color cast_ray(int r, int c);
+    color bounce_ray(const ray& r) const;
+    color cast_ray(int r, int c) const;
     color color_ray(const ray& r);
 
 public:

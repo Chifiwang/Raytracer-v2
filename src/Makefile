@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS = -std=c++17 -Wall -Werror
+CFLAGS = -std=c++17 -Wall -Werror -g
 
 all: final
 
@@ -44,3 +44,6 @@ material.o: material.cpp
 
 bvh.o: bvh.cpp
 	$(CC) $(CFLAGS) -c bvh.cpp -o ../build/bvh.o
+
+threading.o: threading.cpp
+	$(CC) $(CFLAGS) -c threading.cpp -o ../build/threading.o

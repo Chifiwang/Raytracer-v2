@@ -4,6 +4,11 @@
 #include "object.hpp"
 #include "utils.hpp"
 #include "vec3.hpp"
+#include <exception>
+#include <future>
+#include <mutex>
+
+std::mutex mtx;
 
 void Camera::init(Object* scene, Object* lights)
 {
@@ -33,26 +38,51 @@ void Camera::init(Object* scene, Object* lights)
 
 void Camera::render(Object* scene, Object* lights, std::ostream& output)
 {
+    // try {
     init(scene, lights);
+    std::vector<std::future<color>> f(image_height * image_width);
+    // std::future<color> f[0xfffff];
+    // std::packaged_task<color()> s[0xf0][0xff];
+    long x { 0 };
 
     // Write ppm header
     output << "P3\n"
            << image_width << ' ' << image_height << "\n255\n";
 
     for (int r = 0; r < image_height; ++r) {
-        std::clog << '\r' << 100 * r / (image_height - 1) << "% Completed"
-                  << std::flush;
 
         for (int c = 0; c < image_width; ++c) {
-            color px_color = cast_ray(r, c);
-            write_pixel(px_color, output);
+
+            // s[r][c] = std::packaged_task<color()>([r, c, this] {
+            //     return cast_ray(r, c);
+            // });
+            // f.push_back(s[r][c].get_future());
+            // m_pool.post(std::packaged_task<void()>([r, c, &s] {
+            //     s[r][c]();
+            // }));
+            // f.push_back(std::async(std::launch::async, [r, c, this] {
+            //     return cast_ray(r, c);
+            // }));
+            f[x++] = (std::async(std::launch::async,
+                &Camera::cast_ray, this, r, c));
+        }
+    }
+
+    for (int i = 0; i < x; ++i) {
+        try {
+            f[i].wait();
+            write_pixel(f[i].get(), output);
+            // std::clog << i++ << '\n';
+        } catch (std::exception& e) {
+            // i++;
+            continue;
         }
     }
 
     std::clog << "\rRender Completed                                   \n";
 }
 
-color Camera::bounce_ray(const ray& r)
+color Camera::bounce_ray(const ray& r) const
 {
     ray curr = r;
     color light { 0 };
@@ -91,7 +121,7 @@ color Camera::bounce_ray(const ray& r)
     return light;
 }
 
-color Camera::cast_ray(int r, int c)
+color Camera::cast_ray(int r, int c) const
 {
     // TODO: add depth of field & bouncing rays
     // Add pdf infra
@@ -126,6 +156,10 @@ color Camera::cast_ray(int r, int c)
             res += bounce_ray(cast_ray);
         }
     }
+    std::unique_lock<std::mutex> lk(mtx);
+    // std::clog << "\rthread: " << c + r * image_height << " completed\n" << std::flush;
+    std::clog << '\r' << 100 * r / (image_height - 1) << "% Completed                                "
+              << std::flush;
     return res / sample_rate;
 }
 

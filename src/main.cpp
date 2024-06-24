@@ -1,5 +1,4 @@
 #include "raytracer.hpp"
-#include "texture.hpp"
 
 int main(void)
 {
@@ -12,8 +11,8 @@ int main(void)
     // cam.fov = 1;
     cam.aperture = 0;
 
-    cam.simulation_depth = 8;
-    cam.sample_rate = 256;
+    cam.simulation_depth = 16;
+    cam.sample_rate = 8192;
 
     // Gradient sky_box = Gradient(color(1), color(0.5, 0.7, 1));
     Gradient sky_box = Gradient(color(0), .5 * color(.4, .2, .7));
@@ -29,7 +28,7 @@ int main(void)
     Material sphere_mat;
     sphere_mat.specular = 1;
     sphere_mat.roughness = .75;
-    sphere_mat.transmissive = false;
+    sphere_mat.transmissive = .5;
     sphere_mat.IoR = 1.5;
     Solid sphere_text(color(1, 0, 1));
     Solid sphere_text2(color(.2, .3, 1));
